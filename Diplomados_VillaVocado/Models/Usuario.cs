@@ -14,6 +14,6 @@
         public RolUsuario Rol { get; set; } = RolUsuario.Usuario;
         public bool Activo { get; set; } = true;
         // Relación: Un usuario puede tener múltiples diplomados
-        public required ICollection<CargaDiplomado> Diplomados { get; set; }
+        public ICollection<CargaDiplomado> Diplomados { get; set; }
     }
 }

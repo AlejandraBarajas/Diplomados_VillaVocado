@@ -9,7 +9,7 @@
         public DateTime FechaFin { get; set; }
         public bool Activo { get; set; } = true;
         // Relación: Usuarios inscritos en este diplomado
-        public required ICollection<CargaDiplomado> Diplomados { get; set; }
+        public ICollection<CargaDiplomado> Diplomados { get; set; }
         public ICollection<Materia> Materias { get; set; } = new List<Materia>();
     }
 }
