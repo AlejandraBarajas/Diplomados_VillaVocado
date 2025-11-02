@@ -13,10 +13,10 @@
         public int Id { get; set; }
         // Relación con Usuario
         public int UsuarioId { get; set; }  // Llave foránea
-        public required Usuario Usuario { get; set; }  // Propiedad de navegación
+        public Usuario Usuario { get; set; }  // Propiedad de navegación
         // Relación con el diplomado
         public int DiplomadoId { get; set; }  // Llave foránea
-        public required Diplomado Diplomado { get; set; }  // Propiedad de navegación
+        public Diplomado Diplomado { get; set; }  // Propiedad de navegación
         public DateTime FechaInscripcion { get; set; } = DateTime.Now;
         public EstadoDiplomado Estado { get; set; } = EstadoDiplomado.Inscrito;
         public DateTime? FechaCompletado { get; set; }

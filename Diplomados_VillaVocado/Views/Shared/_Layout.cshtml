@@ -119,7 +119,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="/MisDiplomados">
+                                <a class="nav-link" href="@Url.Action("MisDiplomados", "Diplomados")">
                                     <i class="fas fa-bookmark"></i> Mis Diplomados
                                 </a>
                             </li>
@@ -130,7 +130,7 @@
                                 <i class="fas fa-user-circle"></i> @nombre
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="/Account/Profile"><i class="fas fa-user"></i> Mi Perfil</a></li>
+                                @* <li><a class="dropdown-item" href="/Account/Profile"><i class="fas fa-user"></i> Mi Perfil</a></li> *@
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form method="post" action="/Account/Logout">

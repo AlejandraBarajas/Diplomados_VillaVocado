@@ -10,7 +10,8 @@ builder.Services.AddDbContext<VillaAvocadoDbContext>(options =>
 );
 //Servicios
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
-
+builder.Services.AddScoped<IDiplomadoService, DiplomadoService>();
+builder.Services.AddScoped<IMateriaService, MateriaService>();
 // Sesiones (para autenticación)
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>

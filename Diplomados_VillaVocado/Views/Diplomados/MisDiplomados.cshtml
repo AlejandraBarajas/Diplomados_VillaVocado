@@ -1,0 +1,133 @@
+﻿@model IEnumerable<Diplomados_VillaVocado.Models.CargaDiplomado>
+
+@{
+    ViewData["Title"] = "Mis Diplomados";
+}
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="text-success">
+            <i class="fas fa-bookmark"></i> Mis Diplomados
+        </h2>
+        <p class="text-muted">Diplomados en los que estás inscrito</p>
+    </div>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle"></i> @ViewBag.Error
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> No estás inscrito en ningún diplomado aún.
+        <a href="@Url.Action("Disponibles", "Diplomados")" class="alert-link">
+            <i class="fas fa-search"></i> Ver diplomados disponibles
+        </a>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var carga in Model)
+        {
+            var estadoClass = carga.Estado switch
+            {
+                Diplomados_VillaVocado.Models.EstadoDiplomado.Inscrito => "bg-primary",
+                Diplomados_VillaVocado.Models.EstadoDiplomado.EnCurso => "bg-warning",
+                Diplomados_VillaVocado.Models.EstadoDiplomado.Completado => "bg-success",
+                Diplomados_VillaVocado.Models.EstadoDiplomado.Cancelado => "bg-danger",
+                _ => "bg-secondary"
+            };
+
+            var estadoTexto = carga.Estado switch
+            {
+                Diplomados_VillaVocado.Models.EstadoDiplomado.Inscrito => "Inscrito",
+                Diplomados_VillaVocado.Models.EstadoDiplomado.EnCurso => "En Curso",
+                Diplomados_VillaVocado.Models.EstadoDiplomado.Completado => "Completado",
+                Diplomados_VillaVocado.Models.EstadoDiplomado.Cancelado => "Cancelado",
+                _ => "Desconocido"
+            };
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3">
+                            <span class="badge @estadoClass">
+                                @estadoTexto
+                            </span>
+                        </div>
+
+                        <h5 class="card-title text-success fw-bold">
+                            @carga.Diplomado.Nombre
+                        </h5>
+
+                        @if (!string.IsNullOrEmpty(carga.Diplomado.Descripcion))
+                        {
+                            <p class="card-text flex-grow-1">
+                                @(carga.Diplomado.Descripcion.Length > 100
+                                                    ? carga.Diplomado.Descripcion.Substring(0, 100) + "..."
+                                                    : carga.Diplomado.Descripcion)
+                </p>
+                                }
+
+                        <div class="mt-auto">
+                            <div class="mb-3">
+                                <small class="text-muted d-block">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Inscrito: @carga.FechaInscripcion.ToString("dd/MM/yyyy")
+                                </small>
+                                @if (carga.Diplomado.Materias != null)
+                                {
+                                    <small class="text-muted d-block">
+                                        <i class="fas fa-book"></i>
+                                        @carga.Diplomado.Materias.Count materias
+                                    </small>
+                                }
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <a href="@Url.Action("Details", "Diplomados", new { id = carga.DiplomadoId })"
+                                   class="btn btn-outline-success btn-sm">
+                                    <i class="fas fa-eye"></i> Ver Detalles
+                                </a>
+
+                                @if (carga.Estado != Diplomados_VillaVocado.Models.EstadoDiplomado.Completado &&
+                                                        carga.Estado != Diplomados_VillaVocado.Models.EstadoDiplomado.Cancelado)
+                                {
+                                    <form method="post" asp-action="Cancelar" asp-route-id="@carga.Id"
+                                          onsubmit="return confirm('¿Estás seguro de cancelar tu inscripción?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                            <i class="fas fa-times-circle"></i> Cancelar Inscripción
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
