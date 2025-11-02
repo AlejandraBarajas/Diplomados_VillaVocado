@@ -1,0 +1,134 @@
+﻿@model Diplomados_VillaVocado.Models.Usuario
+@{
+    ViewData["Title"] = "Eliminar Usuario";
+}
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-action="Index">Usuarios</a></li>
+                <li class="breadcrumb-item active">Eliminar Usuario</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-danger">
+                    <h5 class="alert-heading">
+                        <i class="fas fa-exclamation-circle"></i> ¿Estás seguro?
+                    </h5>
+                    <p class="mb-0">
+                        Esta acción desactivará al usuario. El usuario no podrá iniciar sesión
+                        pero sus datos se mantendrán en el sistema.
+                    </p>
+                </div>
+
+                <div class="card bg-light mb-4">
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <div class="avatar-circle bg-danger text-white mx-auto"
+                                 style="width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-user fa-2x"></i>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <label class="text-muted small">ID</label>
+                                <p class="mb-2"><strong>#@Model.Id</strong></p>
+                            </div>
+                            <div class="col-6">
+                                <label class="text-muted small">Rol</label>
+                                <p class="mb-2">
+                                    @if (Model.Rol == Diplomados_VillaVocado.Models.RolUsuario.Administrador)
+                                    {
+                                        <span class="badge bg-danger">Administrador</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info">Usuario</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="text-muted small">
+                                <i class="fas fa-user"></i> Nombre
+                            </label>
+                            <p class="mb-0"><strong>@Model.Nombre</strong></p>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="text-muted small">
+                                <i class="fas fa-envelope"></i> Correo
+                            </label>
+                            <p class="mb-0">@Model.Correo</p>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="text-muted small">
+                                <i class="fas fa-calendar"></i> Fecha de Registro
+                            </label>
+                            <p class="mb-0">@Model.CreatedAt.ToString("dd/MM/yyyy")</p>
+                        </div>
+
+                        <div>
+                            <label class="text-muted small">
+                                <i class="fas fa-graduation-cap"></i> Diplomados Inscritos
+                            </label>
+                            <p class="mb-0">
+                                <span class="badge bg-primary">@Model.Diplomados.Count diplomado(s)</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post" asp-action="Delete" asp-route-id="@Model.Id" id="deleteForm">
+                    @Html.AntiForgeryToken()
+
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-danger btn-lg" onclick="confirmDelete()">
+                            <i class="fas fa-trash"></i> Sí, Eliminar Usuario
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-times"></i> No, Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmDelete() {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Esta acción desactivará al usuario",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteForm').submit();
+                }
+            });
+        }
+    </script>
+}

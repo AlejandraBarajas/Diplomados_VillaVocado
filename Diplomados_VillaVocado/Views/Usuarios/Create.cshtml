@@ -1,1 +1,85 @@
-﻿
+﻿@{
+    ViewData["Title"] = "Crear Usuario";
+}
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-action="Index">Usuarios</a></li>
+                <li class="breadcrumb-item active">Crear Nuevo</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-user-plus"></i> Crear Nuevo Usuario
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <i class="fas fa-exclamation-circle"></i> @ViewBag.Error
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <form method="post" asp-action="Create">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-user text-success"></i> Nombre Completo *
+                        </label>
+                        <input type="text" name="nombre" class="form-control form-control-lg"
+                               placeholder="Juan Pérez García" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-envelope text-success"></i> Correo Electrónico *
+                        </label>
+                        <input type="email" name="correo" class="form-control form-control-lg"
+                               placeholder="usuario@ejemplo.com" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-lock text-success"></i> Contraseña *
+                        </label>
+                        <input type="password" name="password" class="form-control form-control-lg"
+                               placeholder="Mínimo 6 caracteres" required minlength="6" />
+                        <small class="form-text text-muted">
+                            La contraseña debe tener al menos 6 caracteres
+                        </small>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-shield-alt text-success"></i> Rol *
+                        </label>
+                        <select name="rol" class="form-select form-select-lg" required>
+                            <option value="Usuario">Usuario</option>
+                            <option value="Administrador">Administrador</option>
+                        </select>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-save"></i> Crear Usuario
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

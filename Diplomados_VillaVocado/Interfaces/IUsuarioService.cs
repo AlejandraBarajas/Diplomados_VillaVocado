@@ -5,6 +5,7 @@ namespace Diplomados_VillaVocado.Interfaces
     public interface IUsuarioService
     {
         Task<Usuario?> Login(string correo, string password);
+        //Task<Usuario?> Logout(); 
         Task<Usuario> Register(string nombre, string correo, string password);
         Task<IEnumerable<Usuario>> GetAllUsuarios();
         Task<Usuario?> GetUsuarioById(int id);

@@ -1,1 +1,196 @@
-﻿
+﻿@model Diplomados_VillaVocado.Models.Usuario
+@{
+    ViewData["Title"] = "Detalles del Usuario";
+}
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-action="Index">Usuarios</a></li>
+                <li class="breadcrumb-item active">Detalles</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Información del Usuario -->
+    <div class="col-md-5">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-user"></i> Información del Usuario
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <div class="avatar-circle bg-success text-white mx-auto"
+                         style="width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-user fa-3x"></i>
+                    </div>
+                    <h4 class="mt-3 mb-1">@Model.Nombre</h4>
+                    @if (Model.Rol == Diplomados_VillaVocado.Models.RolUsuario.Administrador)
+                    {
+                        <span class="badge bg-danger">
+                            <i class="fas fa-crown"></i> Administrador
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-info">
+                            <i class="fas fa-user"></i> Usuario
+                        </span>
+                    }
+                </div>
+
+                <hr>
+
+                <div class="mb-3">
+                    <label class="text-muted small">ID</label>
+                    <p class="mb-0"><strong>#@Model.Id</strong></p>
+                </div>
+
+                <div class="mb-3">
+                    <label class="text-muted small">
+                        <i class="fas fa-envelope"></i> Correo Electrónico
+                    </label>
+                    <p class="mb-0">@Model.Correo</p>
+                </div>
+
+                <div class="mb-3">
+                    <label class="text-muted small">
+                        <i class="fas fa-calendar"></i> Fecha de Registro
+                    </label>
+                    <p class="mb-0">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                </div>
+
+                <div class="mb-3">
+                    <label class="text-muted small">
+                        <i class="fas fa-toggle-on"></i> Estado
+                    </label>
+                    <p class="mb-0">
+                        @if (Model.Activo)
+                        {
+                            <span class="badge bg-success">
+                                <i class="fas fa-check"></i> Activo
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">
+                                <i class="fas fa-times"></i> Inactivo
+                            </span>
+                        }
+                    </p>
+                </div>
+
+                @if (Model.LastModification != null)
+                {
+                    <div class="mb-3">
+                        <label class="text-muted small">
+                            <i class="fas fa-clock"></i> Última Modificación
+                        </label>
+                        <p class="mb-0">@Model.LastModification.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="d-grid gap-2">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-lg">
+                <i class="fas fa-edit"></i> Editar Usuario
+            </a>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                <i class="fas fa-arrow-left"></i> Volver a la Lista
+            </a>
+        </div>
+    </div>
+
+    <!-- Diplomados Inscritos -->
+    <div class="col-md-7">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-graduation-cap"></i> Diplomados Inscritos
+                    <span class="badge bg-light text-dark">@Model.Diplomados.Count</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Diplomados.Any())
+                {
+                    <div class="list-group">
+                        @foreach (var cargaDiplomado in Model.Diplomados)
+                        {
+                            <div class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            <i class="fas fa-book text-success"></i>
+                                            @cargaDiplomado.Diplomado.Nombre
+                                        </h6>
+                                        <p class="mb-1 small text-muted">
+                                            <i class="fas fa-calendar"></i>
+                                            @cargaDiplomado.Diplomado.FechaInicio.ToString("dd/MM/yyyy") -
+                                            @cargaDiplomado.Diplomado.FechaFin.ToString("dd/MM/yyyy")
+                                        </p>
+                                        <p class="mb-1 small">
+                                            <i class="fas fa-list"></i>
+                                            <strong>Materias:</strong> @cargaDiplomado.Diplomado.Materias.Count
+                                        </p>
+                                    </div>
+                                    <div class="text-end">
+                                        @switch (cargaDiplomado.Estado)
+                                        {
+                                            case Diplomados_VillaVocado.Models.EstadoDiplomado.Inscrito:
+                                                <span class="badge bg-info">Inscrito</span>
+                                                break;
+                                            case Diplomados_VillaVocado.Models.EstadoDiplomado.EnCurso:
+                                                <span class="badge bg-primary">En Curso</span>
+                                                break;
+                                            case Diplomados_VillaVocado.Models.EstadoDiplomado.Completado:
+                                                <span class="badge bg-success">Completado</span>
+                                                break;
+                                            case Diplomados_VillaVocado.Models.EstadoDiplomado.Cancelado:
+                                                <span class="badge bg-danger">Cancelado</span>
+                                                break;
+                                        }
+
+                                        @if (cargaDiplomado.Calificacion != null)
+                                        {
+                                            <div class="mt-2">
+                                                <small class="text-muted">Calificación:</small>
+                                                <div class="fw-bold text-success">@cargaDiplomado.Calificacion.Value.ToString("F2")</div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                @if (cargaDiplomado.Diplomado.Materias.Any())
+                                {
+                                    <hr class="my-2">
+                                    <div class="small">
+                                        <strong>Materias del diplomado:</strong>
+                                        <ol class="mb-0 ps-3">
+                                            @foreach (var materia in cargaDiplomado.Diplomado.Materias.OrderBy(m => m.Orden))
+                                            {
+                                                <li>@materia.Nombre <span class="text-muted">(@materia.DuracionHoras hrs)</span></li>
+                                            }
+                                        </ol>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Este usuario no está inscrito en ningún diplomado</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,1 +1,108 @@
-﻿
+﻿@model Diplomados_VillaVocado.Models.Usuario
+@{
+    ViewData["Title"] = "Editar Usuario";
+}
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-action="Index">Usuarios</a></li>
+                <li class="breadcrumb-item active">Editar Usuario</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0">
+                    <i class="fas fa-edit"></i> Editar Usuario
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <i class="fas fa-exclamation-circle"></i> @ViewBag.Error
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <form method="post" asp-action="Edit" asp-route-id="@Model.Id">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-hashtag text-warning"></i> ID
+                        </label>
+                        <input type="text" value="@Model.Id" class="form-control" disabled />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-user text-warning"></i> Nombre Completo *
+                        </label>
+                        <input type="text" name="nombre" value="@Model.Nombre" 
+                               class="form-control form-control-lg" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-envelope text-warning"></i> Correo Electrónico *
+                        </label>
+                        <input type="email" name="correo" value="@Model.Correo" 
+                               class="form-control form-control-lg" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-shield-alt text-warning"></i> Rol *
+                        </label>
+                        <select name="rol" class="form-select form-select-lg" required>
+                            @if (Model.Rol == Diplomados_VillaVocado.Models.RolUsuario.Usuario)
+                            {
+                                <option value="Usuario" selected>Usuario</option>
+                                <option value="Administrador">Administrador</option>
+                            }
+                            else
+                            {
+                                <option value="Usuario">Usuario</option>
+                                <option value="Administrador" selected>Administrador</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-toggle-on text-warning"></i> Estado
+                        </label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="activo" 
+                                   id="activoSwitch" value="true" @(Model.Activo ? "checked" : "") />
+                            <label class="form-check-label" for="activoSwitch">
+                                Usuario Activo
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>Nota:</strong> La contraseña no se puede modificar desde aquí.
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-warning btn-lg text-dark">
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

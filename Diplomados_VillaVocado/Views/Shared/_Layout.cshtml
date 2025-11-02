@@ -96,17 +96,17 @@
                         @if (rol == 2) // Administrador
                         {
                             <li class="nav-item">
-                                <a class="nav-link" href="/Usuarios">
+                                <a class="nav-link" href="@Url.Action("Index", "Usuarios")">
                                     <i class="fas fa-users"></i> Usuarios
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="/Diplomados">
+                                <a class="nav-link" href="@Url.Action("Index", "Diplomados")">
                                     <i class="fas fa-book"></i> Diplomados
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="/Materias">
+                                <a class="nav-link" href="@Url.Action("Index", "Materias")">
                                     <i class="fas fa-list"></i> Materias
                                 </a>
                             </li>
@@ -134,6 +134,7 @@
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form method="post" action="/Account/Logout">
+                                        @Html.AntiForgeryToken()
                                         <button type="submit" class="dropdown-item text-danger">
                                             <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
                                         </button>

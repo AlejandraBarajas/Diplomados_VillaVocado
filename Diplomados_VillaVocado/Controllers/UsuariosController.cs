@@ -4,246 +4,278 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Diplomados_VillaVocado.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class UsuariosController : ControllerBase
+    public class UsuariosController : Controller
     {
         private readonly IUsuarioService _usuarioService;
+
         public UsuariosController(IUsuarioService usuarioService)
         {
             _usuarioService = usuarioService;
         }
-        [HttpPost("Login")]
-        public async Task<ActionResult<object>> Login([FromBody] LoginRequest request)
-        {
-            if (string.IsNullOrEmpty(request.Correo) || string.IsNullOrEmpty(request.Password))
-            {
-                return BadRequest(new { message = "Correo y contraseña son requeridos" });
-            }
-            try
-            {
-                var usuario = await _usuarioService.Login(request.Correo, request.Password);
-                if (usuario == null)
-                {
-                    return Unauthorized(new { message = "Credenciales inválidas" });
-                }
-                HttpContext.Session.SetInt32("UsuarioId", usuario.Id);
-                HttpContext.Session.SetString("UsuarioNombre", usuario.Nombre);
-                HttpContext.Session.SetInt32("UsuarioRol", (int)usuario.Rol);
 
-                return Ok(new
-                {
-                    message = "Login exitoso",
-                    usuario = new
-                    {
-                        usuario.Id,
-                        usuario.Nombre,
-                        usuario.Correo,
-                        usuario.Rol
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error al iniciar sesión", error = ex.Message });
-            }
+        // Helper para verificar si es admin
+        private bool EsAdministrador()
+        {
+            var rol = HttpContext.Session.GetInt32("UsuarioRol");
+            return rol == (int)RolUsuario.Administrador;
         }
 
-        [HttpPost("Logout")]
-        public IActionResult Logout()
+        // Helper para verificar login
+        private bool EstaAutenticado()
         {
-            HttpContext.Session.Clear();
-            return Ok(new { message = "Sesión cerrada exitosamente" });
+            return HttpContext.Session.GetInt32("UsuarioId") != null;
         }
 
-        [HttpPost("Register")]
-        public async Task<ActionResult<object>> Register([FromBody] RegisterRequest request)
+        // ========================================
+        // GET: /Usuarios
+        // ========================================
+        public async Task<IActionResult> Index()
         {
-            // Validaciones
-            if (string.IsNullOrWhiteSpace(request.Nombre))
-                return BadRequest(new { message = "Nombre requerido" });
-            if (string.IsNullOrWhiteSpace(request.Correo))
-                return BadRequest(new { message = "Correo requerido" });
-            if (string.IsNullOrWhiteSpace(request.Password))
-                return BadRequest(new { message = "Contraseña requerida" });
-            try
-            {
-                var usuario = await _usuarioService.Register(request.Nombre, request.Correo, request.Password);
-                return CreatedAtAction(nameof(GetUsuario), new { id = usuario.Id }, new
-                {
-                    usuario.Id,
-                    usuario.Nombre,
-                    usuario.Correo,
-                    usuario.Rol,
-                    message = "Nuevo Usuario registrado"
-                });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error al registrar usuario", error = ex.Message });
-            }
-        }
+            if (!EstaAutenticado())
+                return RedirectToAction("Login", "Account");
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<object>>> GetUsuarios()
-        {
-            if (!EsAdministrador()) //validacion del tipo de usuario
+            if (!EsAdministrador())
                 return Forbid();
+
             try
             {
                 var usuarios = await _usuarioService.GetAllUsuarios();
-                var resultado = usuarios.Select(u => new
-                {
-                    u.Id,
-                    u.Nombre,
-                    u.Correo,
-                    u.Rol,
-                    u.Activo,
-                    u.CreatedAt,
-                    DiplomadosInscritos = u.Diplomados.Count
-                });
-                return Ok(resultado);
+                return View(usuarios);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Error al obtener usuarios", error = ex.Message });
+                TempData["Error"] = "Error al cargar usuarios: " + ex.Message;
+                return View(new List<Usuario>());
             }
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<object>> GetUsuario(int id)
+        // ========================================
+        // GET: /Usuarios/Details/5
+        // ========================================
+        public async Task<IActionResult> Details(int id)
         {
+            if (!EstaAutenticado())
+                return RedirectToAction("Login", "Account");
+
+            if (!EsAdministrador())
+                return Forbid();
+
             try
             {
                 var usuario = await _usuarioService.GetUsuarioConDiplomados(id);
+
                 if (usuario == null)
                 {
-                    return NotFound(new { message = "Usuario no encontrado" });
+                    TempData["Error"] = "Usuario no encontrado";
+                    return RedirectToAction(nameof(Index));
                 }
-                return Ok(new
-                {
-                    usuario.Id,
-                    usuario.Nombre,
-                    usuario.Correo,
-                    usuario.Rol,
-                    usuario.Activo,
-                    usuario.CreatedAt,
-                    Diplomados = usuario.Diplomados.Select(cd => new
-                    {
-                        cd.Id,
-                        cd.DiplomadoId,
-                        DiplomadoNombre = cd.Diplomado.Nombre,
-                        cd.FechaInscripcion,
-                        cd.Estado,
-                        FechaInicio = cd.Diplomado.FechaInicio,
-                        FechaFin = cd.Diplomado.FechaFin,
-                        CantidadMaterias = cd.Diplomado.Materias.Count
-                    })
-                });
+
+                return View(usuario);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Error al obtener usuario", error = ex.Message });
+                TempData["Error"] = "Error al cargar usuario: " + ex.Message;
+                return RedirectToAction(nameof(Index));
             }
         }
 
-        [HttpGet("MisDiplomados")]
-        public async Task<ActionResult<object>> GetMisDiplomados()
+        // ========================================
+        // GET: /Usuarios/Create
+        // ========================================
+        public IActionResult Create()
         {
-            var usuarioId = HttpContext.Session.GetInt32("UsuarioId");
-            if (usuarioId == null)
-                return Unauthorized(new { message = "Debe iniciar sesión" });
-            try
-            {
-                var diplomados = await _usuarioService.GetDiplomadosDeUsuario(usuarioId.Value);
-                return Ok(diplomados);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error al obtener diplomados", error = ex.Message });
-            }
-        }
+            if (!EstaAutenticado())
+                return RedirectToAction("Login", "Account");
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUsuario(int id, [FromBody] UpdateUsuarioRequest request)
-        {
             if (!EsAdministrador())
                 return Forbid();
+
+            return View();
+        }
+
+        // ========================================
+        // POST: /Usuarios/Create
+        // ========================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(string nombre, string correo, string password, string rol)
+        {
+            if (!EstaAutenticado())
+                return RedirectToAction("Login", "Account");
+
+            if (!EsAdministrador())
+                return Forbid();
+
+            if (string.IsNullOrWhiteSpace(nombre) || string.IsNullOrWhiteSpace(correo) || string.IsNullOrWhiteSpace(password))
+            {
+                ViewBag.Error = "Todos los campos son requeridos";
+                return View();
+            }
+
             try
             {
-                await _usuarioService.UpdateUsuario(
-                    id,
-                    request.Nombre,
-                    request.Correo,
-                    request.Rol,
-                    request.Activo
-                );
+                var usuario = await _usuarioService.Register(nombre, correo, password);
 
-                return Ok(new { message = "Usuario actualizado exitosamente" });
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound(new { message = "Usuario no encontrado" });
+                // Actualizar rol si es diferente de Usuario
+                if (!string.IsNullOrEmpty(rol) && Enum.TryParse<RolUsuario>(rol, out var rolEnum))
+                {
+                    await _usuarioService.UpdateUsuario(usuario.Id, null, null, rolEnum, null);
+                }
+
+                TempData["Success"] = "Usuario creado exitosamente";
+                return RedirectToAction(nameof(Index));
             }
             catch (InvalidOperationException ex)
             {
-                return Conflict(new { message = ex.Message });
+                ViewBag.Error = ex.Message;
+                return View();
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Error al actualizar usuario", error = ex.Message });
+                ViewBag.Error = "Error al crear usuario: " + ex.Message;
+                return View();
             }
         }
 
-      
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUsuario(int id)
+        // ========================================
+        // GET: /Usuarios/Edit/5
+        // ========================================
+        public async Task<IActionResult> Edit(int id)
         {
+            if (!EstaAutenticado())
+                return RedirectToAction("Login", "Account");
+
             if (!EsAdministrador())
                 return Forbid();
+
+            try
+            {
+                var usuario = await _usuarioService.GetUsuarioById(id);
+
+                if (usuario == null)
+                {
+                    TempData["Error"] = "Usuario no encontrado";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                return View(usuario);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error al cargar usuario: " + ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        // ========================================
+        // POST: /Usuarios/Edit/5
+        // ========================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, string nombre, string correo, string rol, bool activo)
+        {
+            if (!EstaAutenticado())
+                return RedirectToAction("Login", "Account");
+
+            if (!EsAdministrador())
+                return Forbid();
+
+            try
+            {
+                RolUsuario? rolEnum = null;
+                if (!string.IsNullOrEmpty(rol) && Enum.TryParse<RolUsuario>(rol, out var parsedRol))
+                {
+                    rolEnum = parsedRol;
+                }
+
+                await _usuarioService.UpdateUsuario(id, nombre, correo, rolEnum, activo);
+
+                TempData["Success"] = "Usuario actualizado exitosamente";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (KeyNotFoundException)
+            {
+                TempData["Error"] = "Usuario no encontrado";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (InvalidOperationException ex)
+            {
+                ViewBag.Error = ex.Message;
+                var usuario = await _usuarioService.GetUsuarioById(id);
+                return View(usuario);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error al actualizar usuario: " + ex.Message;
+                var usuario = await _usuarioService.GetUsuarioById(id);
+                return View(usuario);
+            }
+        }
+
+        // ========================================
+        // GET: /Usuarios/Delete/5
+        // ========================================
+        public async Task<IActionResult> Delete(int id)
+        {
+            if (!EstaAutenticado())
+                return RedirectToAction("Login", "Account");
+
+            if (!EsAdministrador())
+                return Forbid();
+
+            try
+            {
+                var usuario = await _usuarioService.GetUsuarioById(id);
+
+                if (usuario == null)
+                {
+                    TempData["Error"] = "Usuario no encontrado";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                return View(usuario);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error al cargar usuario: " + ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        // ========================================
+        // POST: /Usuarios/Delete/5
+        // ========================================
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            if (!EstaAutenticado())
+                return RedirectToAction("Login", "Account");
+
+            if (!EsAdministrador())
+                return Forbid();
+
             try
             {
                 var userDeleteId = HttpContext.Session.GetInt32("UsuarioId");
                 var resultado = await _usuarioService.DeleteUsuario(id, userDeleteId);
 
                 if (!resultado)
-                    return NotFound(new { message = "Usuario no encontrado" });
+                {
+                    TempData["Error"] = "Usuario no encontrado";
+                }
+                else
+                {
+                    TempData["Success"] = "Usuario eliminado exitosamente";
+                }
 
-                return Ok(new { message = "Usuario eliminado exitosamente" });
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Error al eliminar usuario", error = ex.Message });
+                TempData["Error"] = "Error al eliminar usuario: " + ex.Message;
+                return RedirectToAction(nameof(Index));
             }
         }
-
-        private bool EsAdministrador()
-        {
-            var rol = HttpContext.Session.GetInt32("UsuarioRol");
-            return rol == (int)RolUsuario.Administrador;
-        }
-    }
-    public class LoginRequest
-    {
-        public required string Correo { get; set; }
-        public required string Password { get; set; }
-    }
-    public class RegisterRequest
-    {
-        public required string Nombre { get; set; }
-        public required string Correo { get; set; }
-        public required string Password { get; set; }
-    }
-    public class UpdateUsuarioRequest
-    {
-        public string? Nombre { get; set; }
-        public string? Correo { get; set; }
-        public RolUsuario? Rol { get; set; }
-        public bool? Activo { get; set; }
     }
 }
-

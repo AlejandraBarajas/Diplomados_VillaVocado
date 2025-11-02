@@ -112,9 +112,22 @@ namespace Diplomados_VillaVocado.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Logout()
         {
-            HttpContext.Session.Clear();
-            TempData["Success"] = "Sesión cerrada exitosamente";
-            return RedirectToAction(nameof(Login));
+            try
+            {
+                // Limpiar toda la sesión
+                HttpContext.Session.Clear();
+
+                // Mensaje de éxito
+                TempData["Success"] = "Has cerrado sesión exitosamente";
+
+                // Redirigir al login
+                return RedirectToAction("Login", "Account");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error al cerrar sesión: " + ex.Message;
+                return RedirectToAction("Login", "Account");
+            }
         }
 
         private IActionResult RedirectToHome()

@@ -152,6 +152,11 @@ namespace Diplomados_VillaVocado.Services
             // En producción, usa BCrypt, PBKDF2 o Argon2
             return Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(password));
         }
+
+        //public Task<Usuario?> Logout()
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 
 }
