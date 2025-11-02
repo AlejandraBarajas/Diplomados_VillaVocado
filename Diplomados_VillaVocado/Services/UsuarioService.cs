@@ -33,7 +33,10 @@ namespace Diplomados_VillaVocado.Services
                 Password = HashPassword(password),
                 Rol = RolUsuario.Usuario,
                 Activo = true,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.Now,
+                UserCreateId = null, 
+                DeletedAt = null,     
+                LastModification = null 
             };
 
             _context.Usuarios.Add(usuario);

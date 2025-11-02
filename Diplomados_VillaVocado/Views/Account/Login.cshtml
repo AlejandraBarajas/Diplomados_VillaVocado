@@ -1,6 +1,6 @@
 ﻿@{
     ViewData["Title"] = "Iniciar Sesión";
-    Layout = null; // Sin layout para página de login
+    Layout = null;
 }
 
 <!DOCTYPE html>
@@ -19,7 +19,6 @@
             align-items: center;
             justify-content: center;
         }
-
         .login-card {
             background: white;
             border-radius: 20px;
@@ -29,38 +28,29 @@
             width: 100%;
             animation: slideIn 0.5s ease-out;
         }
-
         @@keyframes slideIn {
-            from
-
-        {
-            opacity: 0;
-            transform: translateY(-30px);
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        }
-
         .login-header {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
             padding: 40px;
             text-align: center;
         }
-
         .login-body {
             padding: 40px;
         }
-
         .form-control:focus {
             border-color: #10b981;
             box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.25);
         }
-
         .btn-login {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             border: none;
@@ -69,12 +59,10 @@
             font-size: 1.1rem;
             transition: all 0.3s;
         }
-
-            .btn-login:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 10px 25px rgba(16, 185, 129, 0.5);
-            }
-
+        .btn-login:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.5);
+        }
         .input-group-text {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
@@ -149,7 +137,7 @@
 
             <div class="text-center">
                 <small class="text-muted">
-                    <strong>👤 Usuarios de prueba:</strong><br>
+                    <strong>👤Usuarios de prueba:</strong><br>
                     <span class="badge bg-danger">Admin:</span> admin@villaavocado.com / Admin123!<br>
                     <span class="badge bg-info">Usuario:</span> juan.perez@villaavocado.com / User123!
                 </small>
